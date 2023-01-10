@@ -16,9 +16,15 @@ import static com.chess.engine.board.Move.*;
 public class Rook extends Piece{
     private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-8, -1, 1, 8};
 
-    public Rook(Alliance pieceAlliance, int piecePosition) {
+    public Rook(final Alliance pieceAlliance, final int piecePosition) {
 
-        super(PieceType.ROOK,piecePosition, pieceAlliance);
+        super(PieceType.ROOK,piecePosition, pieceAlliance, true);
+    }
+
+    public Rook(final Alliance pieceAlliance,
+                final int piecePosition,
+                final boolean isFirstMove){
+        super(PieceType.ROOK,piecePosition, pieceAlliance, isFirstMove);
     }
 
     @Override
@@ -41,7 +47,7 @@ public class Rook extends Piece{
                         final Piece pieceAtDestination= candidateDestinationTile.getPiece();
                         final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
                         if(this.pieceAlliance != pieceAlliance){
-                            legalMoves.add(new AttackMove(board,this,candidateDestinationCoordinate,pieceAtDestination));
+                            legalMoves.add(new MajorAttackMove(board,this,candidateDestinationCoordinate,pieceAtDestination));
                         }
                         break;
                     }
@@ -49,7 +55,7 @@ public class Rook extends Piece{
             }
 
         }
-        return ImmutableList.copyOf(legalMoves);
+        return ImmutableList.copyOf(legalMoves);//guava
     }
     @Override
     public Rook movePiece(Move move) {

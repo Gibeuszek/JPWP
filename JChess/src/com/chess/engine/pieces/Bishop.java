@@ -15,8 +15,13 @@ import static com.chess.engine.board.Move.*;
 
 public class Bishop extends Piece{
     private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -7, 7, 9};
-    public Bishop(Alliance pieceAlliance, int piecePosition) {
-        super(PieceType.BISHOP,piecePosition, pieceAlliance);
+    public Bishop(final Alliance pieceAlliance, final int piecePosition) {
+        super(PieceType.BISHOP,piecePosition, pieceAlliance, true);
+    }
+    public Bishop(final Alliance pieceAlliance,
+                  final int piecePosition,
+                  final boolean isFirstMove) {
+        super(PieceType.BISHOP,piecePosition, pieceAlliance, isFirstMove);
     }
 
     @Override
@@ -39,7 +44,7 @@ public class Bishop extends Piece{
                         final Piece pieceAtDestination= candidateDestinationTile.getPiece();
                         final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
                         if(this.pieceAlliance != pieceAlliance){
-                            legalMoves.add(new AttackMove(board,this,candidateDestinationCoordinate,pieceAtDestination));
+                            legalMoves.add(new MajorAttackMove(board,this,candidateDestinationCoordinate,pieceAtDestination));
                         }
                         break;
                     }
@@ -47,7 +52,7 @@ public class Bishop extends Piece{
             }
 
         }
-        return ImmutableList.copyOf(legalMoves);
+        return ImmutableList.copyOf(legalMoves);//guava
     }
 
     @Override

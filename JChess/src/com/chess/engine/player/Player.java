@@ -18,10 +18,11 @@ public abstract class Player {
     protected final Collection<Move> legalMoves;
     private final boolean isInCheck;
 
+
     Player(final Board board, final Collection<Move> legalMoves, final Collection<Move> opponentMoves){
         this.board = board;
         this.playerKing = establishKing();
-        this.legalMoves = ImmutableList.copyOf(Iterables.concat(legalMoves, calculateKingCastles(legalMoves,opponentMoves)));
+        this.legalMoves = ImmutableList.copyOf(Iterables.concat(legalMoves, calculateKingCastles(legalMoves,opponentMoves)));//guava
         this.isInCheck = !Player.calculateAttackOnTile(this.playerKing.getPiecePosition(), opponentMoves).isEmpty();
     }
     public King getPlayerKing(){
@@ -30,14 +31,14 @@ public abstract class Player {
     public Collection<Move> getLegalMoves(){
         return this.legalMoves;
     }
-    protected static Collection<Move> calculateAttackOnTile(int piecePosition, Collection<Move> moves) {
+    public static Collection<Move> calculateAttackOnTile(int piecePosition, Collection<Move> moves) {
         final List<Move> attackMoves = new ArrayList<>();
         for(final Move move : moves){
             if(piecePosition == move.getDestinationCoordinate()){
                 attackMoves.add(move);
             }
         }
-        return ImmutableList.copyOf(attackMoves);
+        return ImmutableList.copyOf(attackMoves);//guava
     }
     private King establishKing() {
         for(final Piece piece : getActivePieces()){
@@ -47,7 +48,7 @@ public abstract class Player {
         }
         throw new RuntimeException("Should not reach here! Not a valid board!!");
     }
-    public boolean isMoveLegal(final Move move){
+    public boolean isMoveLegal(Move move){
         return this.legalMoves.contains(move);
     }
     public boolean isInCheck(){
@@ -60,16 +61,7 @@ public abstract class Player {
         return !this.isInCheck && !hasEscapeMoves();
     }
     protected boolean hasEscapeMoves() {
-        for(final Move move : this.legalMoves){
-            final MoveTransition transition = makeMove(move);
-            if(transition.getMoveStatus().isDone()){
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean isCastled(){
-        return false;
+        return this.legalMoves.stream().map(this::makeMove).anyMatch(transition -> transition.getMoveStatus().isDone());
     }
     public MoveTransition makeMove(final Move move){
         if(!isMoveLegal(move)){
@@ -85,6 +77,10 @@ public abstract class Player {
     public abstract Collection<Piece> getActivePieces();
     public abstract Alliance getAlliance();
     public abstract Player getOpponent();
-    protected abstract Collection<Move> calculateKingCastles(Collection<Move> playerLegals,
+    public abstract Collection<Move> calculateKingCastles(Collection<Move> playerLegals,
                                                              Collection<Move> opponentsLegals);
+    public abstract boolean isEnableKingSideCastle(Collection<Move> playerLegals,
+                                                   Collection<Move> opponentsLegals);
+    public abstract boolean isEnableQueenSideCastle(Collection<Move> playerLegals,
+                                                    Collection<Move> opponentsLegals);
 }

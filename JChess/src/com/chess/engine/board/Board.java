@@ -8,7 +8,6 @@ import com.chess.engine.player.WhitePlayer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-import java.sql.Array;
 import java.util.*;
 
 public class Board {
@@ -19,11 +18,13 @@ public class Board {
     private final BlackPlayer blackPlayer;
     private final Player currentPlayer;
 
+    private final Pawn enPassantPawn;
+
     private  Board(final Builder builder){
         this.gameBoard = createGameBoard(builder);
         this.whitePieces = calculateActivePieces(this.gameBoard, Alliance.WHITE);
         this.blackPieces = calculateActivePieces(this.gameBoard, Alliance.BLACK);
-
+        this.enPassantPawn = builder.enPassantPawn;
         final Collection<Move> whiteStandardLegalMoves = calculateLegalMoves(this.whitePieces);
         final Collection<Move> blackStandardLegalMoves = calculateLegalMoves(this.blackPieces);
 
@@ -43,6 +44,7 @@ public class Board {
         }
         return builder.toString();
     }
+
     public Player whitePlayer(){
         return this.whitePlayer;
     }
@@ -51,6 +53,9 @@ public class Board {
     }
     public Player currentPlayer(){
         return this.currentPlayer;
+    }
+    public Pawn getEnPassantPawn(){
+        return this.enPassantPawn;
     }
     public Collection<Piece> getBlackPieces(){
         return this.blackPieces;
@@ -64,7 +69,7 @@ public class Board {
         for(final Piece piece : pieces){
             legalMoves.addAll(piece.calculateLegalMoves(this));
         }
-        return ImmutableList.copyOf(legalMoves);
+        return ImmutableList.copyOf(legalMoves);//guava
     }
 
     private static Collection<Piece> calculateActivePieces(final List<Tile> gameBoard, final Alliance alliance) {
@@ -77,7 +82,7 @@ public class Board {
                 }
             }
         }
-        return ImmutableList.copyOf(activePieces);
+        return ImmutableList.copyOf(activePieces);//guava
     }
 
     public Tile getTile(final int tileCoordinate){
@@ -88,7 +93,7 @@ public class Board {
         for(int i = 0; i<BoardUtils.NUM_TILES; i++){
             tiles[i]=Tile.createTile(i, builder.boardConfig.get(i));
         }
-        return ImmutableList.copyOf(tiles);
+        return ImmutableList.copyOf(tiles);//guava
     }
     public static Board createStandardBoard(){
         final Builder builder = new Builder();
@@ -134,7 +139,7 @@ public class Board {
 
     public Iterable<Move> getAllLegalMoves() {
         return Iterables.unmodifiableIterable(Iterables.concat(this.whitePlayer.getLegalMoves(),
-                                                               this.blackPlayer.getLegalMoves()));
+                                                               this.blackPlayer.getLegalMoves()));//guava
     }
 
     public static class Builder{
@@ -148,9 +153,8 @@ public class Board {
             this.boardConfig.put(piece.getPiecePosition(), piece);
             return this;
         }
-        public Builder setMoveMaker(final Alliance nextMoveMaker){
+        public void setMoveMaker(final Alliance nextMoveMaker){
             this.nextMoveMaker = nextMoveMaker;
-            return this;
         }
         public Board build(){
             return new Board(this);

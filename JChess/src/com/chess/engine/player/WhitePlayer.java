@@ -36,32 +36,52 @@ public class WhitePlayer extends Player{
     }
 
     @Override
-    protected Collection<Move> calculateKingCastles(final Collection<Move> playerLegals, final Collection<Move> opponentsLegals) {
+    public Collection<Move> calculateKingCastles(final Collection<Move> playerLegals, final Collection<Move> opponentsLegals) {
         final List<Move> kingCastles = new ArrayList<>();
+        //KingSideCastle
+        if(this.isEnableKingSideCastle(playerLegals,opponentsLegals)){
+            final Tile rookTile = this.board.getTile(63);
+            kingCastles.add(new KingSideCastleMove(this.board,this.playerKing,62, (Rook)rookTile.getPiece(), rookTile.getTileCoordinate(), 61));
+        }
+        //QueenSideCastle
+        if(this.isEnableQueenSideCastle(playerLegals,opponentsLegals)){
+            final Tile rookTile = this.board.getTile(56);
+            kingCastles.add(new QueenSideCastleMove(this.board,this.playerKing, 58,(Rook)rookTile.getPiece(), rookTile.getTileCoordinate(),59));
+            }
+
+        return ImmutableList.copyOf(kingCastles); //guava
+    }
+
+    @Override
+    public boolean isEnableKingSideCastle(final Collection<Move> playerLegals, final Collection<Move> opponentsLegals) {
         if(this.playerKing.isFirstMove() && !this.isInCheck()) {
             if (!this.board.getTile(61).isTileOccupied() &&
                     !this.board.getTile(62).isTileOccupied()) {
                 final Tile rookTile = this.board.getTile(63);
                 if (rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
-                    if(Player.calculateAttackOnTile(61,opponentsLegals).isEmpty() &&
-                       Player.calculateAttackOnTile(62,opponentsLegals).isEmpty() &&
-                       rookTile.getPiece().getPieceType().isRook()){
-                        kingCastles.add(new KingSideCastleMove(this.board,this.playerKing,62, (Rook)rookTile.getPiece(), rookTile.getTileCoordinate(), 61));
-                    }
-                }
-            }
-            if(!this.board.getTile(59).isTileOccupied() &&
-                    !this.board.getTile(58).isTileOccupied() &&
-                    !this.board.getTile(57).isTileOccupied()){
-                final Tile rookTile = this.board.getTile(56);
-                if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove() &&
-                   Player.calculateAttackOnTile(59,opponentsLegals).isEmpty() &&
-                   Player.calculateAttackOnTile(58,opponentsLegals).isEmpty() &&
-                   rookTile.getPiece().getPieceType().isRook()){
-                    kingCastles.add(new QueenSideCastleMove(this.board,this.playerKing, 58,(Rook)rookTile.getPiece(), rookTile.getTileCoordinate(),59));
+                    return Player.calculateAttackOnTile(61, opponentsLegals).isEmpty() &&
+                            Player.calculateAttackOnTile(62, opponentsLegals).isEmpty() &&
+                            rookTile.getPiece().getPieceType().isRook();
                 }
             }
         }
-        return ImmutableList.copyOf(kingCastles);
+        return false;
+    }
+
+
+    @Override
+    public boolean isEnableQueenSideCastle(final Collection<Move> playerLegals, final Collection<Move> opponentsLegals) {
+        if(this.playerKing.isFirstMove() && !this.isInCheck()) {
+            if (!this.board.getTile(59).isTileOccupied() &&
+                    !this.board.getTile(58).isTileOccupied() &&
+                    !this.board.getTile(57).isTileOccupied()) {
+                final Tile rookTile = this.board.getTile(56);
+                return rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove() &&
+                        Player.calculateAttackOnTile(59, opponentsLegals).isEmpty() &&
+                        Player.calculateAttackOnTile(58, opponentsLegals).isEmpty() &&
+                        rookTile.getPiece().getPieceType().isRook();
+            }
+        }
+        return false;
     }
 }
